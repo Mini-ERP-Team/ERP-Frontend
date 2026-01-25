@@ -1,0 +1,44 @@
+import { useAuthStore } from "../store/useAuthStore";
+
+const Header = ({ title }: { title: string }) => {
+  const user = useAuthStore((state) => state.user);
+
+  return (
+    <header className="flex items-center justify-between border-b border-card-dark bg-[#111418] px-8 py-4 sticky top-0 z-10">
+      <div className="flex items-center gap-4">
+        <h2 className="text-white text-xl font-bold leading-tight tracking-[-0.015em]">
+          {title}
+        </h2>
+      </div>
+      <div className="flex items-center gap-6">
+        <div className="hidden md:flex items-center relative w-64 lg:w-96">
+          <div className="absolute left-3 text-text-secondary">
+            <span className="material-symbols-outlined text-[20px]">
+              search
+            </span>
+          </div>
+          <input
+            className="w-full bg-card-dark border-none rounded-lg py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-text-secondary focus:ring-1 focus:ring-primary focus:outline-none"
+            placeholder="Search orders, products..."
+          />
+        </div>
+
+        <div className="flex items-center gap-3 pl-6 border-l border-card-dark">
+          <div className="text-right hidden sm:block">
+            <p className="text-sm font-medium text-white leading-none">
+              {user?.hoten || "User"}
+            </p>
+            <p className="text-xs text-text-secondary mt-1">
+              {user?.vaitro || "Guest"}
+            </p>
+          </div>
+          <div className="bg-primary/20 flex items-center justify-center rounded-full size-10 border border-card-dark text-primary font-bold">
+            {user?.hoten?.charAt(0) || "U"}
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+};
+
+export default Header;

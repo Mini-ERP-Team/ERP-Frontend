@@ -4,7 +4,8 @@ interface UserInfo {
   idnguoidung: number;
   hoten: string;
   mail: string;
-  vaitro: string;
+  vaitro: string; // admin hoac staff
+  sdt?: string;
 }
 
 interface AuthState {

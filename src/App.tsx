@@ -5,6 +5,8 @@ import LoginPage from "./pages/LoginPage";
 
 import { useAuthStore } from "./store/useAuthStore";
 import authApi from "./api/authApi";
+import MainLayout from "./layouts/MainLayout";
+import DashboardPage from "./pages/DashboardPage";
 
 function App() {
   const [isChecking, setIsChecking] = useState(true);
@@ -48,16 +50,9 @@ function App() {
           }
         />
 
-        <Route
-          path="/dashboard"
-          element={
-            isAuthenticated ? (
-              <Navigate to="/dashboard" />
-            ) : (
-              <Navigate to="/login" />
-            )
-          }
-        />
+        <Route element={<MainLayout />}>
+          <Route path="/dashboard" element={<DashboardPage />} />
+        </Route>
 
         <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
