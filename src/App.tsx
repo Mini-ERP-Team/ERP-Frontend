@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 // import DashboardPage from "./pages/DashboardPage";
@@ -11,8 +11,12 @@ import DashboardPage from "./pages/DashboardPage";
 function App() {
   const [isChecking, setIsChecking] = useState(true);
   const { setAuth, isAuthenticated } = useAuthStore();
+  const didInitAuth = useRef(false);
 
   useEffect(() => {
+    if (didInitAuth.current) return;
+    didInitAuth.current = true;
+
     const initAuth = async () => {
       try {
         console.log("Đang khôi phục phiên đăng nhập...");
@@ -30,7 +34,7 @@ function App() {
     };
 
     initAuth();
-  }, []);
+  }, [setAuth]);
 
   if (isChecking) {
     return (
