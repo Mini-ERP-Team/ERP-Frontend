@@ -54,7 +54,7 @@ axiosClient.interceptors.response.use(
         return axiosClient(originalRequest);
       } catch {
         useAuthStore.getState().logout();
-        // Don't force a full-page reload; let the router render /login based on auth state.
+
         return Promise.reject(error);
       }
     }
