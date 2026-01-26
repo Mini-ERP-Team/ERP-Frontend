@@ -417,7 +417,6 @@ const ProductPage = () => {
           isOpen={isAddOpen}
           onClose={() => setIsAddOpen(false)}
           onSubmit={(data) => {
-            // TODO: call API / update state list
             console.log("submit", data);
             setIsAddOpen(false);
           }}

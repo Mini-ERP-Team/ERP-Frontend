@@ -14,7 +14,6 @@ export type ProductDetail = {
   image?: string;
   icon?: string;
 
-  // optional fields (nếu sau này bạn có data thật)
   description?: string;
   brand?: string;
   warranty?: string;
@@ -68,10 +67,8 @@ export default function ProductDetailModal({
           </button>
         </div>
 
-        {/* Body */}
         <div className="p-6 overflow-y-auto">
           <div className="flex flex-col md:flex-row gap-8">
-            {/* Left: Image */}
             <div className="w-full md:w-1/3 flex flex-col gap-4">
               <div className="aspect-square rounded-lg bg-[#111418] border border-[#283039] flex items-center justify-center overflow-hidden relative">
                 {product.image ? (
@@ -86,7 +83,6 @@ export default function ProductDetailModal({
                 )}
               </div>
 
-              {/* thumbnail demo (optional) */}
               <div className="grid grid-cols-3 gap-2">
                 <div className="aspect-square rounded bg-[#111418] border border-[#283039]" />
                 <div className="aspect-square rounded bg-[#111418] border border-[#283039]" />
@@ -94,7 +90,6 @@ export default function ProductDetailModal({
               </div>
             </div>
 
-            {/* Right: Info */}
             <div className="w-full md:w-2/3 flex flex-col gap-6">
               <div>
                 <div className="flex items-start justify-between gap-4 mb-2">
@@ -147,7 +142,6 @@ export default function ProductDetailModal({
           </div>
         </div>
 
-        {/* Footer */}
         <div className="p-6 border-t border-[#283039] bg-[#1c252e] flex flex-col sm:flex-row gap-3 justify-end">
           <button
             className="w-full sm:w-auto px-4 py-2.5 rounded-lg border border-red-500/20 text-red-500 hover:bg-red-500/10 transition-colors font-medium flex items-center justify-center gap-2"

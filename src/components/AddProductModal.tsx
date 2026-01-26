@@ -46,7 +46,6 @@ export default function AddProductModal({ isOpen, onClose, onSubmit }: Props) {
   const [name, setName] = useState("");
   const [sku, setSku] = useState("");
 
-  // smartphone
   const [brand, setBrand] = useState("");
   const [model, setModel] = useState("");
   const [capacity, setCapacity] = useState("256");
@@ -55,13 +54,11 @@ export default function AddProductModal({ isOpen, onClose, onSubmit }: Props) {
   const [phoneStock, setPhoneStock] = useState<number>(0);
   const [price, setPrice] = useState<number>(0);
 
-  // component
   const [componentType, setComponentType] = useState("");
   const [supplier, setSupplier] = useState("");
   const [componentStock, setComponentStock] = useState<number>(0);
   const [techSpecs, setTechSpecs] = useState("");
 
-  // accessory
   const [accessoryType, setAccessoryType] = useState("");
   const [compatibility, setCompatibility] = useState("");
   const [colorSize, setColorSize] = useState("");
@@ -121,7 +118,6 @@ export default function AddProductModal({ isOpen, onClose, onSubmit }: Props) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <div className="bg-[#1c252e] w-full max-w-2xl rounded-xl border border-[#283039] shadow-2xl flex flex-col max-h-[90vh]">
-        {/* header */}
         <div className="flex items-center justify-between p-6 border-b border-[#283039]">
           <h2 className="text-white text-lg font-bold">Add New Product</h2>
           <button
@@ -133,7 +129,6 @@ export default function AddProductModal({ isOpen, onClose, onSubmit }: Props) {
           </button>
         </div>
 
-        {/* body */}
         <div className="p-6 overflow-y-auto">
           <div className="flex flex-col gap-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -392,7 +387,6 @@ export default function AddProductModal({ isOpen, onClose, onSubmit }: Props) {
           </div>
         </div>
 
-        {/* footer */}
         <div className="p-6 border-t border-[#283039] flex justify-end gap-3 bg-[#1c252e] rounded-b-xl">
           <button
             onClick={onClose}
