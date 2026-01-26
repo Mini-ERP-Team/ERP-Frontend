@@ -3,6 +3,7 @@ import LoginPage from "../pages/LoginPage";
 import DashboardPage from "../pages/DashboardPage";
 import MainLayout from "../layouts/MainLayout";
 import ProductsPage from "../pages/ProductsPage";
+import CustomersPage from "../pages/CustomersPage";
 
 const AppRoutes = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
   return (
@@ -17,6 +18,7 @@ const AppRoutes = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
       <Route element={<MainLayout />}>
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/products" element={<ProductsPage />} />
+        <Route path="/customers" element={<CustomersPage />} />
       </Route>
 
       <Route
