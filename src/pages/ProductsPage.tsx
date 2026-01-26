@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
 type StockStatus = "In Stock" | "Low Stock" | "Out of Stock";
 
@@ -157,12 +157,11 @@ const StatusBadge = ({
 };
 
 const ProductRow = ({ product }: { product: Product }) => {
-  const [isExpanded, setIsExpanded] = useState(product.id === 1); // demo: iPhone mở sẵn
+  const [isExpanded, setIsExpanded] = useState(false);
   const hasVariants = (product.variants?.length ?? 0) > 0;
 
   return (
     <>
-      {/* Product Row */}
       <tr
         className={[
           "hover:bg-[#323b46] transition-colors group bg-[#283039]",
@@ -199,7 +198,9 @@ const ProductRow = ({ product }: { product: Product }) => {
 
         <td className="p-4">
           <div className="flex flex-col">
-            <span className="text-white text-sm font-medium">{product.name}</span>
+            <span className="text-white text-sm font-medium">
+              {product.name}
+            </span>
             <span className="text-[#9dabb9] text-xs">
               {product.variantCountText ?? "Single Item"}
             </span>
@@ -233,21 +234,18 @@ const ProductRow = ({ product }: { product: Product }) => {
               title="Edit"
               onClick={(e) => e.stopPropagation()}
             >
-              <span className="material-symbols-outlined text-[18px]">edit</span>
+              <span className="material-symbols-outlined text-[18px]">
+                edit
+              </span>
             </button>
           </div>
         </td>
-
       </tr>
 
-      {/* Variant rows */}
       {isExpanded &&
         hasVariants &&
         product.variants!.map((v) => (
-          <tr
-            key={v.id}
-            className="bg-[#20272e] "
-          >
+          <tr key={v.id} className="bg-[#20272e] ">
             <td className="p-4 pl-6"></td>
 
             <td className="p-4 pl-0">
@@ -266,10 +264,16 @@ const ProductRow = ({ product }: { product: Product }) => {
 
             <td className="p-4 text-[#9dabb9] text-xs"></td>
 
-            <td className="p-4 text-[#ced4da] text-sm font-medium">{v.price}</td>
+            <td className="p-4 text-[#ced4da] text-sm font-medium">
+              {v.price}
+            </td>
 
             <td className="p-4 text-[#ced4da] text-sm font-medium">
-              <StockBar value={v.stock} percent={v.stockPercent} status={v.status} />
+              <StockBar
+                value={v.stock}
+                percent={v.stockPercent}
+                status={v.status}
+              />
             </td>
 
             <td className="p-4">
@@ -283,7 +287,9 @@ const ProductRow = ({ product }: { product: Product }) => {
                   title="Edit"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <span className="material-symbols-outlined text-[16px]">edit</span>
+                  <span className="material-symbols-outlined text-[16px]">
+                    edit
+                  </span>
                 </button>
 
                 <button
@@ -291,11 +297,12 @@ const ProductRow = ({ product }: { product: Product }) => {
                   title="Delete"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <span className="material-symbols-outlined text-[16px]">delete</span>
+                  <span className="material-symbols-outlined text-[16px]">
+                    delete
+                  </span>
                 </button>
               </div>
             </td>
-
           </tr>
         ))}
     </>
@@ -305,7 +312,6 @@ const ProductRow = ({ product }: { product: Product }) => {
 const ProductPage = () => {
   return (
     <>
-      {/* Toolbar */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full md:w-auto">
           <div className="relative w-full sm:w-64">
@@ -335,7 +341,6 @@ const ProductPage = () => {
         </button>
       </div>
 
-      {/* Table */}
       <section className="bg-[#283039] rounded-xl border border-[#283039] overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
@@ -377,7 +382,6 @@ const ProductPage = () => {
           </table>
         </div>
 
-        {/* Pagination Footer */}
         <div className="border-t border-[#111418] p-4 flex items-center justify-between">
           <span className="text-xs text-[#9dabb9]">
             Showing 1-4 of 24 products
