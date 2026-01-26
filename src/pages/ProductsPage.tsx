@@ -1,5 +1,6 @@
 import { useState } from "react";
-
+import AddProductModal from "../components/AddProductModal";
+import ProductDetailModal from "../components/ProductDetailModal";
 type StockStatus = "In Stock" | "Low Stock" | "Out of Stock";
 
 type Variant = {
@@ -156,30 +157,34 @@ const StatusBadge = ({
   );
 };
 
-const ProductRow = ({ product }: { product: Product }) => {
+const ProductRow = ({ product, onOpenDetail, }: { product: Product; onOpenDetail: (p: Product) => void; }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const hasVariants = (product.variants?.length ?? 0) > 0;
 
   return (
     <>
       <tr
-        className={[
-          "hover:bg-[#323b46] transition-colors group bg-[#283039]",
-          hasVariants ? "cursor-pointer" : "",
-        ].join(" ")}
-        onClick={() => hasVariants && setIsExpanded((v) => !v)}
+        className="hover:bg-[#323b46] transition-colors group cursor-pointer"
+        onClick={() => onOpenDetail(product)}
       >
         <td className="p-4 pl-6">
-          <span
+          <button
+            type="button"
             className={[
               "material-symbols-outlined text-[#9dabb9] group-hover:text-white transition-transform",
-              hasVariants ? "" : "opacity-0",
+              hasVariants ? "" : "opacity-0 pointer-events-none",
               isExpanded ? "rotate-90" : "",
             ].join(" ")}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (hasVariants) setIsExpanded((v) => !v);
+            }}
+            aria-label={isExpanded ? "Collapse variants" : "Expand variants"}
           >
             chevron_right
-          </span>
+          </button>
         </td>
+
 
         <td className="p-4 pl-0">
           {product.image ? (
@@ -310,6 +315,9 @@ const ProductRow = ({ product }: { product: Product }) => {
 };
 
 const ProductPage = () => {
+  const [isAddOpen, setIsAddOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
   return (
     <>
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -335,7 +343,9 @@ const ProductPage = () => {
           </button>
         </div>
 
-        <button className="flex items-center gap-2 bg-primary hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors shadow-lg shadow-blue-500/20 whitespace-nowrap self-end md:self-auto">
+        <button
+          onClick={() => setIsAddOpen(true)}
+          className="flex items-center gap-2 bg-primary hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors shadow-lg shadow-blue-500/20 whitespace-nowrap self-end md:self-auto">
           <span className="material-symbols-outlined text-[20px]">add</span>
           <span className="text-sm font-medium">Add Product</span>
         </button>
@@ -376,7 +386,9 @@ const ProductPage = () => {
 
             <tbody className="divide-y divide-[#111418]">
               {products.map((p) => (
-                <ProductRow key={p.id} product={p} />
+                <ProductRow key={p.id} product={p} onOpenDetail={(prod) => {
+                  setSelectedProduct(prod);
+                }} />
               ))}
             </tbody>
           </table>
@@ -399,6 +411,25 @@ const ProductPage = () => {
           </div>
         </div>
       </section>
+
+      {isAddOpen && (
+        <AddProductModal
+          isOpen={isAddOpen}
+          onClose={() => setIsAddOpen(false)}
+          onSubmit={(data) => {
+            // TODO: call API / update state list
+            console.log("submit", data);
+            setIsAddOpen(false);
+          }}
+        />
+      )}
+
+      <ProductDetailModal
+        open={!!selectedProduct}
+        product={selectedProduct}
+        onClose={() => setSelectedProduct(null)}
+      />
+
     </>
   );
 };
