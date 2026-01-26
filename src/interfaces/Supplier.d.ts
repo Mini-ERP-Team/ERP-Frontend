@@ -8,12 +8,12 @@ interface Supplier {
   phone: string;
   status: "Active" | "Pending" | "Inactive";
   initials: string;
-  colorClass: string; // Màu cho avatar
+  colorClass: string;
 }
 
 interface SupplierStat {
   label: string;
   value: string;
   icon: string;
-  colorClass: string; // Màu text & bg icon
+  colorClass: string;
 }
