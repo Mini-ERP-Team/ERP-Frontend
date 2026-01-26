@@ -7,6 +7,7 @@ import CustomersPage from "../pages/CustomersPage";
 import SuppliersPage from "../pages/SuppliersPage";
 import UsersPage from "../pages/UsersPage";
 import InventoryPage from "../pages/InventoryPage";
+import SalesPage from "../pages/SalesPage";
 
 const AppRoutes = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
   return (
@@ -25,6 +26,7 @@ const AppRoutes = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
         <Route path="/suppliers" element={<SuppliersPage />} />
         <Route path="/users" element={<UsersPage />} />
         <Route path="/inventory" element={<InventoryPage />} />
+        <Route path="/sales" element={<SalesPage />} />
       </Route>
 
       <Route
