@@ -9,6 +9,7 @@ import UsersPage from "../pages/UsersPage";
 import InventoryPage from "../pages/InventoryPage";
 import SalesPage from "../pages/SalesPage";
 import ImportsPage from "../pages/ImportsPage";
+import RoleRoute from "../components/RoleRoute";
 
 const AppRoutes = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
   return (
@@ -25,10 +26,16 @@ const AppRoutes = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
         <Route path="/products" element={<ProductsPage />} />
         <Route path="/customers" element={<CustomersPage />} />
         <Route path="/suppliers" element={<SuppliersPage />} />
-        <Route path="/users" element={<UsersPage />} />
         <Route path="/inventory" element={<InventoryPage />} />
-        <Route path="/sales" element={<SalesPage />} />
         <Route path="/imports" element={<ImportsPage />} />
+
+        <Route element={<RoleRoute allowedRoles={['STAFF']} />}>
+            <Route path="/sales" element={<SalesPage />} />
+        </Route>
+
+        <Route element={<RoleRoute allowedRoles={['ADMIN']} />}>
+            <Route path="/users" element={<UsersPage />} />
+        </Route>
       </Route>
 
       <Route

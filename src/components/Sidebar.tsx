@@ -2,6 +2,8 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
 
 const Sidebar = () => {
+  const user = useAuthStore((state) => state.user);
+
   const logout = useAuthStore((state) => state.logout);
   const navigate = useNavigate();
 
@@ -11,7 +13,7 @@ const Sidebar = () => {
     navigate("/login");
   };
 
-  const menuItems = [
+  const allMenuItems = [
     { icon: "dashboard", label: "Dashboard", path: "/dashboard" },
     { icon: "inventory_2", label: "Products", path: "/products" },
     { icon: "groups", label: "Customers", path: "/customers" },
@@ -21,6 +23,13 @@ const Sidebar = () => {
     { icon: "receipt_long", label: "Sales", path: "/sales" },
     { icon: "publish", label: "Imports", path: "/imports" },
   ];
+
+  const menuItems = allMenuItems.filter(item => {
+      if (user?.vaitro.toUpperCase() === 'ADMIN' && item.path === '/sales') {
+          return false;
+      }
+      return true
+  })
 
   return (
     <aside className="flex h-full w-64 flex-col border-r border-card-dark bg-[#111418] flex-shrink-0 transition-all duration-300">
