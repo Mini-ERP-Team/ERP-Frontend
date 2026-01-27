@@ -202,14 +202,29 @@ const UsersPage = () => {
                           edit
                         </span>
                       </button>
-                      <button
-                        className="p-2 text-text-secondary hover:text-[#fa6238] hover:bg-[#fa6238]/10 rounded-lg transition-colors"
-                        title="Delete User"
-                      >
-                        <span className="material-symbols-outlined text-[18px]">
-                          delete
-                        </span>
-                      </button>
+                      {user.status === "Active" ? (
+                        <button
+                          className="p-2 text-text-secondary hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+                          title="Vô hiệu hóa nhân viên (Khoá tài khoản)"
+                          onClick={(e) => {
+                              e.stopPropagation();
+                              console.log("Ban user", user.id);
+                          }}
+                        >
+                          <span className="material-symbols-outlined text-[18px]">block</span>
+                        </button>
+                      ) : (
+                        <button
+                          className="p-2 text-text-secondary hover:text-[#0bda5b] hover:bg-[#0bda5b]/10 rounded-lg transition-colors"
+                          title="Kích hoạt lại nhân viên"
+                          onClick={(e) => {
+                              e.stopPropagation();
+                              console.log("Unban user", user.id);
+                          }}
+                        >
+                          <span className="material-symbols-outlined text-[18px]">check_circle</span>
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>

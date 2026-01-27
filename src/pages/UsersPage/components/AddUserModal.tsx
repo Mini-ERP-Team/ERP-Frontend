@@ -8,7 +8,7 @@ export type AddUserPayload = {
   email: string;
   sdt: string;
   vaitro: UserRole;
-  manhanvien: string;
+  manhanvien?: string;
   matkhau: string;
 };
 
@@ -23,7 +23,6 @@ export default function AddUserModal({ isOpen, onClose, onSubmit }: Props) {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [role, setRole] = useState<UserRole>("STAFF");
-  const [userId, setUserId] = useState("");
   const [password, setPassword] = useState("Staff@123");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,7 +41,6 @@ export default function AddUserModal({ isOpen, onClose, onSubmit }: Props) {
         email: email,
         sdt: phone,
         vaitro: role,
-        manhanvien: userId,
         matkhau: password,
       });
 
@@ -50,7 +48,6 @@ export default function AddUserModal({ isOpen, onClose, onSubmit }: Props) {
       setEmail("");
       setPhone("");
       setRole("STAFF");
-      setUserId("");
       setPassword("Staff@123");
       onClose();
     } catch (e) {
@@ -97,19 +94,7 @@ export default function AddUserModal({ isOpen, onClose, onSubmit }: Props) {
                   />
                 </div>
 
-                <div>
-                   <label className="block text-xs font-semibold text-[#9dabb9] uppercase tracking-wider mb-2">
-                    User ID
-                  </label>
-                  <input
-                    value={userId}
-                    onChange={(e) => setUserId(e.target.value)}
-                    className="w-full bg-[#283039] border border-[#283039] rounded-lg px-4 py-2.5 text-sm text-white focus:border-primary focus:outline-none placeholder:text-[#9dabb9]/50"
-                    placeholder="Auto-generated if empty"
-                  />
-                </div>
-
-                <div>
+                <div className="md:col-span-2">
                   <label className="block text-xs font-semibold text-[#9dabb9] uppercase tracking-wider mb-2">
                     Role (Vai trò)
                   </label>
