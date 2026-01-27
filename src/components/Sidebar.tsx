@@ -28,6 +28,10 @@ const Sidebar = () => {
       if (user?.vaitro.toUpperCase() === 'ADMIN' && item.path === '/sales') {
           return false;
       }
+    
+      if (user?.vaitro.toUpperCase() === 'STAFF' && item.path === '/users') {
+          return false;
+      }
       return true
   })
 
