@@ -1,4 +1,5 @@
 import { useState } from "react";
+import ErrorAlert from "../../../components/ErrorAlert";
 
 export type UserRole = "ADMIN" | "STAFF";
 
@@ -14,7 +15,7 @@ export type AddUserPayload = {
 type Props = {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: AddUserPayload) => void;
+  onSubmit: (data: AddUserPayload) => Promise<void>;
 };
 
 export default function AddUserModal({ isOpen, onClose, onSubmit }: Props) {
@@ -24,27 +25,41 @@ export default function AddUserModal({ isOpen, onClose, onSubmit }: Props) {
   const [role, setRole] = useState<UserRole>("STAFF");
   const [userId, setUserId] = useState("");
   const [password, setPassword] = useState("Staff@123");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    setError(null);
     if (!fullName.trim() || !email.trim() || !password.trim()) {
-      alert("Please fill in all required fields!");
+      setError("Vui lòng nhập đầy đủ Họ tên, Email và Mật khẩu.");
       return;
     }
 
-    onSubmit({
-      hoten: fullName,
-      email: email,
-      sdt: phone,
-      vaitro: role,
-      manhanvien: userId,
-      matkhau: password,
-    });
-    
-    setFullName("");
-    setEmail("");
-    setPhone("");   
-    setRole("STAFF");
-    onClose();
+    try {
+      setIsSubmitting(true);
+      await onSubmit({
+        hoten: fullName,
+        email: email,
+        sdt: phone,
+        vaitro: role,
+        manhanvien: userId,
+        matkhau: password,
+      });
+
+      setFullName("");
+      setEmail("");
+      setPhone("");
+      setRole("STAFF");
+      setUserId("");
+      setPassword("Staff@123");
+      onClose();
+    } catch (e) {
+      const message =
+        e instanceof Error ? e.message : "Tạo user thất bại. Vui lòng thử lại.";
+      setError(message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -61,6 +76,7 @@ export default function AddUserModal({ isOpen, onClose, onSubmit }: Props) {
         </div>
 
         <div className="p-6 overflow-y-auto custom-scrollbar">
+          {error && <ErrorAlert message={error} className="mb-4 mt-0" />}
           <div className="flex flex-col gap-6">
             
             <div>
@@ -166,8 +182,20 @@ export default function AddUserModal({ isOpen, onClose, onSubmit }: Props) {
         </div>
 
         <div className="p-6 border-t border-[#283039] flex justify-end gap-3 bg-[#1c252e] rounded-b-xl">
-          <button onClick={onClose} className="px-5 py-2.5 rounded-lg border border-[#3e4a56] text-[#9dabb9] hover:text-white transition-colors text-sm font-medium">Cancel</button>
-          <button onClick={handleSubmit} className="px-5 py-2.5 rounded-lg bg-primary hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20 transition-all text-sm font-medium">Create Account</button>
+          <button
+            onClick={onClose}
+            disabled={isSubmitting}
+            className="px-5 py-2.5 rounded-lg border border-[#3e4a56] text-[#9dabb9] hover:text-white disabled:opacity-60 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className="px-5 py-2.5 rounded-lg bg-primary hover:bg-blue-600 disabled:hover:bg-primary disabled:opacity-60 disabled:cursor-not-allowed text-white shadow-lg shadow-blue-500/20 transition-all text-sm font-medium"
+          >
+            {isSubmitting ? "Creating..." : "Create Account"}
+          </button>
         </div>
       </div>
     </div>
