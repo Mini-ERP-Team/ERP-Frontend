@@ -10,14 +10,22 @@ const UsersPage = () => {
 
   const [isAddUserOpen, setIsAddUserOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserDetail | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const [roleFilter, setRoleFilter] = useState("all");
 
   const filteredList = useMemo(() => {
-    if (roleFilter === "all") return userList;
-    console.log(userList);
-    return userList.filter((user) => user.role === roleFilter);
-  }, [userList, roleFilter]);
+    return userList.filter((user) => {
+      const matchesRole = roleFilter === "all" || user.role === roleFilter;
+
+      const query = searchQuery.toLowerCase().trim();
+      const matchesSearch = 
+        user.name.toLowerCase().includes(query) || 
+        user.email.toLowerCase().includes(query);
+
+      return matchesRole && matchesSearch;
+    })
+  }, [userList, roleFilter, searchQuery]);
 
   const handleAddSubmit = async (data: AddUserPayload) => {
     await addUser(data);
@@ -78,6 +86,8 @@ const UsersPage = () => {
               </span>
             </div>
             <input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               type="text"
               className="w-full bg-gray-50 dark:bg-[#1c2229] border border-gray-200 dark:border-[#3e4a56] rounded-lg py-2.5 pl-10 pr-4 text-sm text-gray-900 dark:text-white placeholder:text-text-secondary focus:ring-1 focus:ring-primary focus:border-primary focus:outline-none transition-all"
               placeholder="Search users by name or email..."
@@ -129,7 +139,9 @@ const UsersPage = () => {
               {!loading && filteredList.length === 0 && (
                 <tr>
                   <td colSpan={5} className="p-8 text-center text-text-secondary">
-                    No users found matching filter.
+                    {searchQuery 
+                      ? `No users found matching "${searchQuery}"`
+                      : "No users found."}
                   </td>
                 </tr>
               )}
