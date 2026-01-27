@@ -40,6 +40,10 @@ const LoginPage: React.FC = () => {
       console.log("Login Success:", response.data);
 
       setAuth(response.data.user, response.data.accessToken);
+      try {
+        localStorage.removeItem("auth:loggedOut");
+      } catch {
+      }
 
       console.log("Đã lưu Token vào RAM (Zustand)");
       navigate("/dashboard");

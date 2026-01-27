@@ -24,6 +24,10 @@ const authApi = {
     const url = "/auth/refresh-token";
     return axiosClient.post(url);
   },
+
+  logout() {
+    return axiosClient.post("/auth/logout");
+  },
 };
 
 export default authApi;

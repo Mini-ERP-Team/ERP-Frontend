@@ -48,12 +48,20 @@ axiosClient.interceptors.response.use(
         const newAccessToken = res.data.accessToken;
 
         useAuthStore.getState().setAuth(res.data.user, newAccessToken);
+        try {
+          localStorage.removeItem("auth:loggedOut");
+        } catch {
+        }
 
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
 
         return axiosClient(originalRequest);
       } catch {
         useAuthStore.getState().logout();
+        try {
+          localStorage.setItem("auth:loggedOut", "1");
+        } catch {
+        }
 
         return Promise.reject(error);
       }

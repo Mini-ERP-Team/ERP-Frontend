@@ -16,11 +16,22 @@ function App() {
 
     const initAuth = async () => {
       try {
+        if (localStorage.getItem("auth:loggedOut") === "1") {
+          return;
+        }
+      } catch {
+      }
+
+      try {
         console.log("Đang khôi phục phiên đăng nhập...");
         const response = await authApi.refreshToken();
 
         if (response.data.accessToken) {
           setAuth(response.data.user, response.data.accessToken);
+          try {
+            localStorage.removeItem("auth:loggedOut");
+          } catch {
+          }
           console.log("Khôi phục thành công!");
         }
       } catch {

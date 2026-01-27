@@ -1,5 +1,6 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
+import authApi from "../api/authApi";
 
 const Sidebar = () => {
   const user = useAuthStore((state) => state.user);
@@ -7,8 +8,19 @@ const Sidebar = () => {
   const logout = useAuthStore((state) => state.logout);
   const navigate = useNavigate();
 
-  const handleLogout = (e: React.MouseEvent) => {
+  const handleLogout = async (e: React.MouseEvent) => {
     e.preventDefault();
+
+    try {
+      await authApi.logout();
+    } catch {
+    }
+
+    try {
+      localStorage.setItem("auth:loggedOut", "1");
+    } catch {
+    }
+
     logout();
     navigate("/login");
   };
