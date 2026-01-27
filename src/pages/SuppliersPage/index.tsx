@@ -1,8 +1,8 @@
 import { useState } from "react";
-import AddSupplierModal from '../components/AddSupplierModal';
-import type { AddSupplierPayload } from '../components/AddSupplierModal';
-import SupplierDetailModal from "../components/SupplierDetailModal";
-import type { SupplierDetail } from "../components/SupplierDetailModal";
+import AddSupplierModal from "./components/AddSupplierModal";
+import type { AddSupplierPayload } from "./components/AddSupplierModal";
+import SupplierDetailModal from "./components/SupplierDetailModal";
+import type { SupplierDetail } from "./components/SupplierDetailModal";
 
 type SupplierStat = {
   label: string;

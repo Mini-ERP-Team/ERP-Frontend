@@ -1,6 +1,7 @@
+
 import { useState } from "react";
-import AddProductModal from "../components/AddProductModal";
-import ProductDetailModal from "../components/ProductDetailModal";
+import AddProductModal from "./components/AddProductModal";
+import ProductDetailModal from "./components/ProductDetailModal";
 type StockStatus = "In Stock" | "Low Stock" | "Out of Stock";
 
 type Variant = {
