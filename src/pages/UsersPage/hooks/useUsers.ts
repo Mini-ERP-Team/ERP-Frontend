@@ -2,6 +2,7 @@
 import { useState, useEffect, useMemo } from "react";
 import usersApi, { type UserDto } from "../../../api/usersApi";
 import type { AddUserPayload } from "../components/AddUserModal";
+import { formatDistanceToNow } from "date-fns";
 
 const mapApiRoleToLabel = (role: string): User["role"] => {
   const normalized = role?.toUpperCase?.() ?? "";
@@ -23,6 +24,18 @@ const roleColorClass = (roleLabel: User["role"]) => {
 
 const mapDtoToUserRow = (dto: UserDto): User => {
   const roleLabel = mapApiRoleToLabel(dto.vaitro);
+
+  let relativeTime = "Never";
+  if (dto.lancuoidangnhap) {
+    try {
+      relativeTime = formatDistanceToNow(new Date(dto.lancuoidangnhap), { 
+        addSuffix: true,
+      });
+    } catch (e) {
+      relativeTime = "Unknown";
+    }
+  }
+  
   return {
     id: String(dto.idnguoidung),
     name: dto.hoten,
@@ -31,9 +44,7 @@ const mapDtoToUserRow = (dto: UserDto): User => {
     userId: dto.manhanvien ?? undefined,
     role: roleLabel,
     status: dto.trangthai ? "Active" : "Inactive",
-    lastLogin: dto.lancuoidangnhap
-      ? new Date(dto.lancuoidangnhap).toLocaleString()
-      : "Never",
+    lastLogin: relativeTime,
     initials: getInitials(dto.hoten),
     colorClass: roleColorClass(roleLabel),
   };
