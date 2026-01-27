@@ -46,7 +46,7 @@ const customers: Customer[] = [
     lastPurchaseItem: "Wireless Charger",
     avatar:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuB8e3OwTWeczO2ixPshlI9kBySAXEzGF20tbmxaRRiT9p-Y7qqhhipnPHL6xgytTuyto_R8CEIz1jf74qAeC9BUQFewYzcul8HeMPTAJkbfxvaHmBpkw7jWnQwUrjeg9cozBA0uYaEnCFXTZM9xgaIMAit7VuSbiXAb15L1N_oifxAzdnPZpHALpmLKsWsBBz_2ShWC4ElQz4t7nyOhhQmbYZjfKmqnPtI3MJ0-jSeT2PTvahRMF15sTc7m-7dLPObQlfe2bksA2tI",
-  }, // Có ảnh
+  },
   {
     id: "5",
     customerId: "#CUS-4432",

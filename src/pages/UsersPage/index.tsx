@@ -1,31 +1,28 @@
-const stats: UserStat[] = [
-  {
-    label: "Total Users",
-    value: "42",
-    icon: "group",
-    colorClass: "text-primary bg-primary/20",
-  },
-  {
-    label: "Admins",
-    value: "5",
-    icon: "shield_person",
-    colorClass: "text-purple-400 bg-purple-500/20",
-  },
-  {
-    label: "Staff",
-    value: "37",
-    icon: "badge",
-    colorClass: "text-orange-400 bg-orange-500/20",
-  },
-  {
-    label: "Active Now",
-    value: "12",
-    icon: "radio_button_checked",
-    colorClass: "text-[#0bda5b] bg-[#0bda5b]/20",
-  },
-];
+import AddUserModal from "./components/AddUserModal";
+import type { AddUserPayload, UserRole } from "./components/AddUserModal";
+import { useMemo, useState } from "react";
+import UserDetailModal, { type UserDetail } from "./components/UserDetailModal";
 
-const users: User[] = [
+type UserStat = {
+  label: string;
+  value: string;
+  icon: string;
+  colorClass: string;
+};
+
+type User = {
+  id: string;
+  name: string;
+  email: string;
+  role: "Admin" | "Staff";
+  status: "Active" | "Inactive";
+  lastLogin: string;
+  avatar?: string;
+  initials?: string;
+  colorClass?: string;
+};
+
+const initialUsers: User[] = [
   {
     id: "1",
     name: "John Doe",
@@ -130,6 +127,84 @@ const StatusBadge = ({ status }: { status: string }) => {
 };
 
 const UsersPage = () => {
+  const [isAddUserOpen, setIsAddUserOpen] = useState(false);
+  const [userList, setUserList] = useState<User[]>(initialUsers);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+
+  const stats: UserStat[] = useMemo(() => {
+    const total = userList.length;
+    const admins = userList.filter((u) => u.role === "Admin").length;
+    const staff = userList.filter((u) => u.role === "Staff").length;
+    const activeNow = userList.filter((u) => u.status === "Active").length;
+
+    return [
+      {
+        label: "Total Users",
+        value: String(total),
+        icon: "group",
+        colorClass: "text-primary bg-primary/20",
+      },
+      {
+        label: "Admins",
+        value: String(admins),
+        icon: "shield_person",
+        colorClass: "text-purple-400 bg-purple-500/20",
+      },
+      {
+        label: "Staff",
+        value: String(staff),
+        icon: "badge",
+        colorClass: "text-orange-400 bg-orange-500/20",
+      },
+      {
+        label: "Active Now",
+        value: String(activeNow),
+        icon: "radio_button_checked",
+        colorClass: "text-[#0bda5b] bg-[#0bda5b]/20",
+      },
+    ];
+  }, [userList]);
+
+  const mapRoleLabel = (role: UserRole): User["role"] => {
+    if (role === "ADMIN") return "Admin";
+    if (role === "STAFF") return "Staff";
+    return "Staff";
+  };
+
+  const getInitials = (fullName: string) => {
+    const parts = fullName
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2);
+    const initials = parts.map((p) => p[0]?.toUpperCase()).join("");
+    return initials || "U";
+  };
+
+  const roleColorClass = (roleLabel: User["role"]) => {
+    if (roleLabel === "Admin")
+      return "text-purple-400 bg-purple-500/20 border-purple-500/30";
+    if (roleLabel === "Staff")
+      return "text-blue-400 bg-blue-500/20 border-blue-500/30";
+  };
+
+  const handleAddUserSubmit = (payload: AddUserPayload) => {
+    const roleLabel = mapRoleLabel(payload.vaitro);
+
+    const newUser: User = {
+      id: String(Date.now()),
+      name: payload.hoten,
+      email: payload.email,
+      role: roleLabel,
+      status: "Active",
+      lastLogin: "just now",
+      initials: getInitials(payload.hoten),
+      colorClass: roleColorClass(roleLabel),
+    };
+
+    setUserList((prev) => [newUser, ...prev]);
+  };
+
   return (
     <>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -141,7 +216,10 @@ const UsersPage = () => {
             Manage system access and permissions
           </p>
         </div>
-        <button className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-5 py-2.5 rounded-lg shadow-lg shadow-primary/20 transition-all active:scale-95 w-full sm:w-auto justify-center group">
+        <button
+          onClick={() => setIsAddUserOpen(true)}
+          className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-5 py-2.5 rounded-lg shadow-lg shadow-primary/20 transition-all active:scale-95 w-full sm:w-auto justify-center group"
+        >
           <span className="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">
             add
           </span>
@@ -225,10 +303,11 @@ const UsersPage = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-[#111418]">
-              {users.map((user) => (
+              {userList.map((user) => (
                 <tr
                   key={user.id}
-                  className="hover:bg-gray-50 dark:hover:bg-[#323b46] transition-colors group"
+                  className="hover:bg-gray-50 dark:hover:bg-[#323b46] transition-colors group cursor-pointer"
+                  onClick={() => setSelectedUser(user)}
                 >
                   <td className="p-4 pl-6">
                     <div className="flex items-center gap-3">
@@ -253,7 +332,10 @@ const UsersPage = () => {
                     <StatusBadge status={user.status} />
                   </td>
                   <td className="p-4 pr-6 text-right">
-                    <div className="flex items-center justify-end gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div 
+                      className="flex items-center justify-end gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={(e) => e.stopPropagation()} 
+                    >
                       <button
                         className="p-2 text-text-secondary hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#3e4a56] rounded-lg transition-colors"
                         title="Edit User"
@@ -298,6 +380,20 @@ const UsersPage = () => {
           </div>
         </div>
       </div>
+
+      <AddUserModal
+        isOpen={isAddUserOpen}
+        onClose={() => setIsAddUserOpen(false)}
+        onSubmit={handleAddUserSubmit}
+      />
+
+      {selectedUser && (
+        <UserDetailModal
+          user={selectedUser}
+          isOpen={!!selectedUser}
+          onClose={() => setSelectedUser(null)}
+        />
+      )}
     </>
   );
 };
