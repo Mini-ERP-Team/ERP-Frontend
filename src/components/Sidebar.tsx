@@ -51,10 +51,12 @@ const Sidebar = () => {
     <aside className="flex h-full w-64 flex-col border-r border-card-dark bg-[#111418] flex-shrink-0 transition-all duration-300">
       <div className="flex flex-col h-full p-4">
         <div className="flex gap-3 mb-8 px-2">
-          <div className="bg-primary/20 flex items-center justify-center rounded-lg size-10 text-primary">
-            <span className="material-symbols-outlined text-2xl">
-              grid_view
-            </span>
+          <div className="bg-primary/20 flex items-center justify-center rounded-lg size-10 overflow-hidden">
+            <img
+                src="/logo.png"
+                alt="Logo"
+                className="h-full w-full object-contain"
+            />
           </div>
           <div className="flex flex-col justify-center">
             <h1 className="text-white text-base font-bold leading-tight">
