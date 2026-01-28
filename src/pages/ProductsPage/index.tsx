@@ -22,6 +22,7 @@ const ProductPage = () => {
     setSearch,
     setCategory,
     setSort,
+    fetchProducts,
     handleAddProductSubmit,
   } = useProducts();
 
@@ -176,6 +177,10 @@ const ProductPage = () => {
         open={!!selectedProduct}
         product={selectedProduct}
         onClose={() => setSelectedProduct(null)}
+        onEdit={(updated) => {
+          setSelectedProduct(updated);
+          fetchProducts();
+        }}
       />
 
     </>
