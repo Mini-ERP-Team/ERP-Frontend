@@ -1,4 +1,17 @@
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "../store/useAuthStore";
+import productsApi from "../api/productsApi.ts";
+import ErrorAlert from "../components/ErrorAlert";
+
+type LowStockRow = {
+  key: string;
+  name: string;
+  sku: string;
+  qty: number;
+  icon: string;
+  level: "Critical" | "Low";
+};
 
 const StatCard = ({
   title,
@@ -28,6 +41,113 @@ const StatCard = ({
 
 const DashboardPage = () => {
   const navigate = useNavigate();
+  const user = useAuthStore((s) => s.user);
+  const isAdmin = (user?.vaitro ?? "").toUpperCase() === "ADMIN";
+
+  const [lowStockRows, setLowStockRows] = useState<LowStockRow[]>([]);
+  const [lowStockLoading, setLowStockLoading] = useState(false);
+  const [lowStockError, setLowStockError] = useState<string | null>(null);
+
+  const LOW_STOCK_THRESHOLD = 5;
+
+  const mapDanhMucToIcon = (danhmuc?: string | null) => {
+    const v = (danhmuc ?? "").toLowerCase();
+    if (v === "smartphone") return "smartphone";
+    if (v === "component") return "memory";
+    if (v === "accessory") return "devices_other";
+    return "inventory_2";
+  };
+
+  const computeLowStockRows = (list: ProductListItemDto[]) => {
+    const rows: LowStockRow[] = [];
+
+    for (const p of list) {
+      const icon = mapDanhMucToIcon(p.category);
+      const variants = p.variants ?? [];
+
+      if (variants.length > 0) {
+        for (const v of variants) {
+          const qty = v.tonkho ?? 0;
+          if (qty <= LOW_STOCK_THRESHOLD) {
+            rows.push({
+              key: `${p.id}-${v.idphanloai}`,
+              name: p.name,
+              sku: v.sku ?? "-",
+              qty,
+              icon,
+              level: qty <= 0 ? "Critical" : "Low",
+            });
+          }
+        }
+        continue;
+      }
+
+      if ((p.stock ?? 0) <= LOW_STOCK_THRESHOLD) {
+        rows.push({
+          key: `${p.id}`,
+          name: p.name,
+          sku: "-",
+          qty: p.stock ?? 0,
+          icon,
+          level: (p.stock ?? 0) <= 0 ? "Critical" : "Low",
+        });
+      }
+    }
+
+    rows.sort((a, b) => {
+      if (a.level !== b.level) return a.level === "Critical" ? -1 : 1;
+      return a.qty - b.qty;
+    });
+
+    return rows.slice(0, 8);
+  };
+
+  const fetchLowStock = async () => {
+    setLowStockLoading(true);
+    setLowStockError(null);
+    try {
+      const res = await productsApi.getAllProducts({ page: 1, limit: 200 });
+      const list = res.data?.data ?? [];
+      setLowStockRows(computeLowStockRows(list));
+    } catch (e) {
+      setLowStockError(
+        e instanceof Error ? e.message : "Không thể tải cảnh báo tồn kho.",
+      );
+      setLowStockRows([]);
+    } finally {
+      setLowStockLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchLowStock();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const revenueSeries = useMemo(() => {
+    return [120, 180, 160, 220, 205, 260, 240];
+  }, []);
+
+  const revenueChart = useMemo(() => {
+    const w = 640;
+    const h = 220;
+    const pad = 24;
+
+    const max = Math.max(...revenueSeries, 1);
+    const min = Math.min(...revenueSeries, 0);
+    const span = Math.max(1, max - min);
+
+    const pts = revenueSeries.map((v, i) => {
+      const x = pad + (i * (w - pad * 2)) / (revenueSeries.length - 1);
+      const y = pad + ((max - v) * (h - pad * 2)) / span;
+      return { x, y, v };
+    });
+
+    const line = `M ${pts.map((p) => `${p.x},${p.y}`).join(" L ")}`;
+    const area = `${line} L ${pts[pts.length - 1].x},${h - pad} L ${pts[0].x},${h - pad} Z`;
+
+    return { w, h, pad, pts, line, area };
+  }, [revenueSeries]);
 
   return (
     <>
@@ -74,18 +194,17 @@ const DashboardPage = () => {
         <h3 className="text-white text-lg font-bold mb-4">Quick Actions</h3>
         <div className="flex flex-wrap gap-4">
           {[
-            { icon: "add_circle", label: "Add Product" },
-            { icon: "shopping_cart", label: "Create Order" },
-            { icon: "assignment_return", label: "Register Return" },
-            { icon: "person_add", label: "New Supplier" },
+            { icon: "add_circle", label: "Add Product", path: "/products" },
+            ...(isAdmin
+              ? []
+              : [{ icon: "shopping_cart", label: "Create Order", path: "/sales/new" }]),
+            { icon: "person_add", label: "New Supplier", path: "/suppliers" },
           ].map((action, idx) => (
             <button
               key={idx}
               className="flex items-center gap-2 bg-card-dark hover:bg-primary text-white px-4 py-3 rounded-lg border border-card-dark hover:border-primary transition-all group"
               onClick={() => {
-                if (action.label === "Create Order") navigate("/sales/new");
-                if (action.label === "Add Product") navigate("/products");
-                if (action.label === "New Supplier") navigate("/suppliers");
+                navigate(action.path);
               }}
             >
               <span className="material-symbols-outlined text-primary group-hover:text-white transition-colors">
@@ -105,21 +224,75 @@ const DashboardPage = () => {
               <option>Last 7 Days</option>
             </select>
           </div>
-          <div className="flex-1 flex items-end gap-2 sm:gap-4 md:gap-6 h-64 w-full">
-            {[40, 65, 50, 85, 75, 45, 30].map((h, i) => (
-              <div
-                key={i}
-                className="flex-1 flex flex-col justify-end gap-2 group"
+
+          <div className="flex-1 w-full">
+            <div className="h-64 w-full rounded-lg border border-[#111418] bg-[#111418] overflow-hidden">
+              <svg
+                viewBox={`0 0 ${revenueChart.w} ${revenueChart.h}`}
+                className="w-full h-full"
+                preserveAspectRatio="none"
               >
-                <div
-                  className={`w-full rounded-t-sm transition-all relative ${i === 4 ? "bg-primary shadow-[0_0_15px_rgba(19,127,236,0.3)]" : "bg-primary/30 group-hover:bg-primary"}`}
-                  style={{ height: `${h}%` }}
-                ></div>
-                <p className="text-text-secondary text-xs text-center">
-                  Day {i + 1}
-                </p>
-              </div>
-            ))}
+                <defs>
+                  <linearGradient id="revFill" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0%" stopColor="rgba(19,127,236,0.35)" />
+                    <stop offset="100%" stopColor="rgba(19,127,236,0.02)" />
+                  </linearGradient>
+                  <linearGradient id="revStroke" x1="0" x2="1" y1="0" y2="0">
+                    <stop offset="0%" stopColor="rgba(19,127,236,0.7)" />
+                    <stop offset="100%" stopColor="rgba(19,127,236,1)" />
+                  </linearGradient>
+                </defs>
+
+                {[0, 1, 2, 3].map((i) => {
+                  const y =
+                    revenueChart.pad +
+                    (i * (revenueChart.h - revenueChart.pad * 2)) / 3;
+                  return (
+                    <line
+                      key={i}
+                      x1={revenueChart.pad}
+                      y1={y}
+                      x2={revenueChart.w - revenueChart.pad}
+                      y2={y}
+                      stroke="rgba(255,255,255,0.06)"
+                      strokeWidth="1"
+                    />
+                  );
+                })}
+
+                <path d={revenueChart.area} fill="url(#revFill)" />
+
+                <path
+                  d={revenueChart.line}
+                  fill="none"
+                  stroke="url(#revStroke)"
+                  strokeWidth="3"
+                  strokeLinejoin="round"
+                  strokeLinecap="round"
+                />
+
+                {revenueChart.pts.map((p, idx) => (
+                  <circle
+                    key={idx}
+                    cx={p.x}
+                    cy={p.y}
+                    r="5"
+                    fill="#111418"
+                    stroke="rgba(19,127,236,1)"
+                    strokeWidth="2"
+                  />
+                ))}
+              </svg>
+            </div>
+
+            <div className="mt-3 grid grid-cols-7 gap-2">
+              {revenueSeries.map((v, i) => (
+                <div key={i} className="text-center">
+                  <div className="text-[11px] text-text-secondary">Day {i + 1}</div>
+                  <div className="text-xs text-white font-semibold">${v}</div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -171,6 +344,11 @@ const DashboardPage = () => {
         <div className="p-6 border-b border-[#111418] flex justify-between items-center">
           <h3 className="text-white text-lg font-bold">Low Stock Alerts</h3>
         </div>
+        {lowStockError && (
+          <div className="px-6 pt-4">
+            <ErrorAlert message={lowStockError} className="mb-0" />
+          </div>
+        )}
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -190,27 +368,54 @@ const DashboardPage = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#111418]">
-              <tr className="hover:bg-[#323b46] transition-colors">
-                <td className="p-4 flex items-center gap-3">
-                  <div className="size-10 rounded bg-[#111418] flex items-center justify-center border border-[#3e4a56] text-text-secondary">
-                    <span className="material-symbols-outlined">
-                      smartphone
-                    </span>
-                  </div>
-                  <span className="text-white text-sm font-medium">
-                    Samsung Galaxy S23
-                  </span>
-                </td>
-                <td className="p-4 text-text-secondary text-sm">SP-S23-001</td>
-                <td className="p-4 text-white text-sm font-bold text-right">
-                  12
-                </td>
-                <td className="p-4 text-right">
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-500/10 text-red-400">
-                    Critical
-                  </span>
-                </td>
-              </tr>
+              {lowStockLoading && (
+                <tr>
+                  <td colSpan={4} className="p-8 text-center text-text-secondary">
+                    Loading low stock items...
+                  </td>
+                </tr>
+              )}
+
+              {!lowStockLoading && lowStockRows.length === 0 && (
+                <tr>
+                  <td colSpan={4} className="p-8 text-center text-text-secondary">
+                    No low stock items.
+                  </td>
+                </tr>
+              )}
+
+              {!lowStockLoading &&
+                lowStockRows.map((row) => (
+                  <tr key={row.key} className="hover:bg-[#323b46] transition-colors">
+                    <td className="p-4 flex items-center gap-3">
+                      <div className="size-10 rounded bg-[#111418] flex items-center justify-center border border-[#3e4a56] text-text-secondary">
+                        <span className="material-symbols-outlined">
+                          {row.icon}
+                        </span>
+                      </div>
+                      <span className="text-white text-sm font-medium">
+                        {row.name}
+                      </span>
+                    </td>
+                    <td className="p-4 text-text-secondary text-sm font-mono">
+                      {row.sku}
+                    </td>
+                    <td className="p-4 text-white text-sm font-bold text-right">
+                      {row.qty}
+                    </td>
+                    <td className="p-4 text-right">
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          row.level === "Critical"
+                            ? "bg-red-500/10 text-red-400"
+                            : "bg-orange-500/10 text-orange-400"
+                        }`}
+                      >
+                        {row.level}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>
