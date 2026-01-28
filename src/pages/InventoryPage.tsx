@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import productsApi from "../api/productsApi.ts";
+import ErrorAlert from "../components/ErrorAlert";
 
 interface Variant {
   id: string;
@@ -21,144 +23,6 @@ interface Product {
   icon?: string;
   variants?: Variant[];
 }
-
-const products: Product[] = [
-  {
-    id: "1",
-    name: "iPhone 15 Pro",
-    totalStock: 145,
-    brand: "Apple",
-    category: "Smartphones",
-    status: "In Stock",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuDBVuFQACffN6RvcrStL4BvjBIy7gKA__L76xy0dK8vbEVN8I1prX3n_DJw6jyPrH0TG1TyEF2eEFA5krcO54J0BOYo6gIw5jeJr3T5BUiY7CSkWIAiZPS7psxSgnevXBsepjOYTy_EhyUc2YMBm0mYLChkkwz44n1qdidCN_Q1nEyQqKFEVasp_OIstNgQ0VqeDvLAZ-hT3pzmysr9r1tAIBAQyvPqhKX15L2ifVUfk_iDCIacxv3DfKEoSAH976sujyvHk6WPUJU",
-    variants: [
-      {
-        id: "v1",
-        name: "128GB - Blue Titanium - VN/A",
-        sku: "IP15P-128-BLU-VN",
-        brand: "Apple",
-        category: "Smartphones",
-        stock: 45,
-        location: "Shelf A-01",
-      },
-      {
-        id: "v2",
-        name: "256GB - Natural Titanium - VN/A",
-        sku: "IP15P-256-NAT-VN",
-        brand: "Apple",
-        category: "Smartphones",
-        stock: 62,
-        location: "Shelf A-02",
-      },
-      {
-        id: "v3",
-        name: "512GB - Black Titanium - LL/A",
-        sku: "IP15P-512-BLK-LL",
-        brand: "Apple",
-        category: "Smartphones",
-        stock: 38,
-        location: "Shelf A-03",
-      },
-    ],
-  },
-  {
-    id: "2",
-    name: "Samsung Galaxy S24 Ultra",
-    totalStock: 82,
-    brand: "Samsung",
-    category: "Smartphones",
-    status: "In Stock",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuB_XHFezXzYIiuOJ-YxaJ3L_AHRlucrAlXCSvrxfBQDVielOr0SVCJ-BguR18WpVTneyvi7Ky7Hi77VoJFpPD5DbfxlRfYvnzEYAuOES5oTpZqIPHgFr1uyvuPz5IQMZTBdEWjSX6iY7wZnW2vbDCqPaq3Vr6SIdbQJ5WRxL7IT5ZpvEG77UGFQ5KF0X_mEuvqRjzg0jCwL9MRMoqWXIRkrmWCF49rDoT-3lM1SM45xDXu12wdEoYSGmfWrARXzoDfps0gcZajYyyA",
-    variants: [
-      {
-        id: "v1",
-        name: "512GB / Titanium Gray",
-        sku: "SG-S24U-512-GRY",
-        brand: "Samsung",
-        category: "Smartphones",
-        stock: 32,
-        location: "Zone A-12-05",
-      },
-      {
-        id: "v2",
-        name: "1TB / Titanium Black",
-        sku: "SG-S24U-1TB-BLK",
-        brand: "Samsung",
-        category: "Smartphones",
-        stock: 50,
-        location: "Zone A-12-07",
-      },
-    ],
-  },
-  {
-    id: "3",
-    name: "USB-C to Lightning Cable (1m)",
-    totalStock: 154,
-    brand: "Apple",
-    category: "Accessories",
-    status: "In Stock",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuB8e3OwTWeczO2ixPshlI9kBySAXEzGF20tbmxaRRiT9p-Y7qqhhipnPHL6xgytTuyto_R8CEIz1jf74qAeC9BUQFewYzcul8HeMPTAJkbfxvaHmBpkw7jWnQwUrjeg9cozBA0uYaEnCFXTZM9xgaIMAit7VuSbiXAb15L1N_oifxAzdnPZpHALpmLKsWsBBz_2ShWC4ElQz4t7nyOhhQmbYZjfKmqnPtI3MJ0-jSeT2PTvahRMF15sTc7m-7dLPObQlfe2bksA2tI",
-  },
-  {
-    id: "4",
-    name: "Screen Protector iPhone 14/15",
-    totalStock: 8,
-    brand: "Belkin",
-    category: "Accessories",
-    status: "Low Stock",
-    icon: "mobile_friendly",
-  },
-  {
-    id: "5",
-    name: 'MacBook Pro 14" M3 Chip',
-    totalStock: 12,
-    brand: "Apple",
-    category: "Laptops",
-    status: "Low Stock",
-    icon: "laptop_mac",
-    variants: [
-      {
-        id: "v1",
-        name: "M3 Pro / 18GB / 512GB / Space Black",
-        sku: "MB-PRO14-M3P",
-        brand: "Apple",
-        category: "Laptops",
-        stock: 5,
-        location: "Zone C-01-02",
-      },
-      {
-        id: "v2",
-        name: "M3 Max / 36GB / 1TB / Silver",
-        sku: "MB-PRO14-M3M",
-        brand: "Apple",
-        category: "Laptops",
-        stock: 7,
-        location: "Zone C-01-03",
-      },
-    ],
-  },
-  {
-    id: "6",
-    name: "Sony WH-1000XM5",
-    totalStock: 18,
-    brand: "Sony",
-    category: "Audio",
-    status: "In Stock",
-    icon: "headphones",
-  },
-  {
-    id: "7",
-    name: "Anker PowerBank 20k",
-    totalStock: 0,
-    brand: "Anker",
-    category: "Accessories",
-    status: "Out of Stock",
-    icon: "battery_charging_full",
-  },
-];
 
 const StatusBadge = ({ status }: { status: string }) => {
   let styles = "bg-[#0bda5b]/10 text-[#0bda5b]";
@@ -328,6 +192,110 @@ const InventoryRow = ({ product }: { product: Product }) => {
 };
 
 const InventoryPage = () => {
+  const [productList, setProductList] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+
+  const [search, setSearch] = useState("");
+  const didInit = useRef(false);
+
+  const mapDanhMucToUi = (danhmuc?: string | null) => {
+    const v = (danhmuc ?? "").toLowerCase();
+    if (v === "smartphone") return "Smartphones";
+    if (v === "component") return "Components";
+    if (v === "accessory") return "Accessories";
+    return danhmuc ?? "Products";
+  };
+
+  const toStatus = (stock: number): Product["status"] => {
+    if (stock <= 0) return "Out of Stock";
+    if (stock <= 10) return "Low Stock";
+    return "In Stock";
+  };
+
+  const mapToInventoryProducts = (list: ProductListItemDto[]): Product[] => {
+    return list.map((p) => {
+      const category = mapDanhMucToUi(p.category);
+      const totalStock = p.stock ?? 0;
+      const status = toStatus(totalStock);
+
+      const variants: Variant[] = (p.variants ?? []).map((v) => {
+        const name =
+          [
+            v.dungluong ?? undefined,
+            v.mausac ?? undefined,
+            v.xuatxu ?? undefined,
+          ]
+            .filter(Boolean)
+            .join(" - ") || v.tenphanloai;
+
+        return {
+          id: String(v.idphanloai),
+          name,
+          sku: v.sku ?? "-",
+          brand: (p.brand ?? "-") as string,
+          category,
+          stock: v.tonkho ?? 0,
+          location: "-",
+        };
+      });
+
+      return {
+        id: String(p.id),
+        name: p.name,
+        totalStock,
+        brand: (p.brand ?? "-") as string,
+        category,
+        status,
+        image: p.image ?? undefined,
+        variants: variants.length > 0 ? variants : undefined,
+      };
+    });
+  };
+
+  const fetchInventory = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await productsApi.getAllProducts({
+        page,
+        limit,
+        search: search.trim() || undefined,
+      });
+      const list = res.data?.data ?? [];
+      setProductList(mapToInventoryProducts(list));
+      setTotal(res.data?.meta?.total ?? 0);
+      setTotalPages(res.data?.meta?.totalPages ?? 1);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Không thể tải dữ liệu kho.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!didInit.current) {
+      didInit.current = true;
+      fetchInventory();
+      return;
+    }
+
+    const t = window.setTimeout(() => {
+      fetchInventory();
+    }, 350);
+
+    return () => window.clearTimeout(t);
+  }, [page, search]);
+
+  const lowStockCount = useMemo(() => {
+    return productList.filter((p) => p.status === "Low Stock").length;
+  }, [productList]);
+
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -361,7 +329,7 @@ const InventoryPage = () => {
                 Items Low in Stock
               </p>
               <h3 className="text-gray-900 dark:text-white text-3xl font-bold tracking-tight">
-                12
+                {lowStockCount}
               </h3>
               <p className="text-[#fa6238] text-xs font-medium mt-1 flex items-center gap-1">
                 <span className="material-symbols-outlined text-[14px]">
@@ -378,6 +346,8 @@ const InventoryPage = () => {
           </div>
         </div>
       </div>
+
+      {error && <ErrorAlert message={error} />}
 
       <div className="border-b border-gray-200 dark:border-[#283039]">
         <nav aria-label="Tabs" className="flex gap-8">
@@ -400,6 +370,11 @@ const InventoryPage = () => {
           <input
             className="w-full bg-white dark:bg-input-bg border border-gray-200 dark:border-input-bg rounded-lg py-2.5 pl-10 pr-4 text-sm text-gray-900 dark:text-white placeholder:text-text-secondary focus:ring-1 focus:ring-primary focus:outline-none transition-all"
             placeholder="Search by Product Name, SKU, or Category..."
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
           />
         </div>
         <button className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20 w-full lg:w-auto">
@@ -442,36 +417,61 @@ const InventoryPage = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-[#111418]">
-              {products.map((product) => (
-                <InventoryRow key={product.id} product={product} />
-              ))}
+              {loading && (
+                <tr>
+                  <td colSpan={8} className="p-8 text-center text-text-secondary">
+                    Loading inventory...
+                  </td>
+                </tr>
+              )}
+
+              {!loading && productList.length === 0 && (
+                <tr>
+                  <td colSpan={8} className="p-8 text-center text-text-secondary">
+                    No items found.
+                  </td>
+                </tr>
+              )}
+
+              {!loading &&
+                productList.map((product) => (
+                  <InventoryRow key={product.id} product={product} />
+                ))}
             </tbody>
           </table>
         </div>
 
         <div className="p-4 border-t border-gray-200 dark:border-[#111418] bg-white dark:bg-input-bg flex items-center justify-between">
           <span className="text-xs text-text-secondary">
-            Showing 1-7 of 1,240 products
+            Showing{" "}
+            <span className="text-gray-900 dark:text-white font-medium">
+              {productList.length === 0 ? 0 : (page - 1) * limit + 1}-
+              {(page - 1) * limit + productList.length}
+            </span>{" "}
+            of{" "}
+            <span className="text-gray-900 dark:text-white font-medium">
+              {total}
+            </span>{" "}
+            items (Page {page}/{totalPages})
           </span>
           <div className="flex gap-2">
-            <button className="size-8 flex items-center justify-center rounded bg-gray-100 dark:bg-[#1c2229] text-text-secondary hover:bg-primary hover:text-white transition-colors">
+            <button
+              className="size-8 flex items-center justify-center rounded bg-gray-100 dark:bg-[#1c2229] text-text-secondary hover:bg-primary hover:text-white disabled:opacity-50 transition-colors"
+              disabled={page <= 1 || loading}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+            >
               <span className="material-symbols-outlined text-sm">
                 chevron_left
               </span>
             </button>
             <button className="size-8 flex items-center justify-center rounded bg-primary text-white">
-              1
+              {page}
             </button>
-            <button className="size-8 flex items-center justify-center rounded bg-gray-100 dark:bg-[#1c2229] text-text-secondary hover:bg-primary hover:text-white transition-colors">
-              2
-            </button>
-            <button className="size-8 flex items-center justify-center rounded bg-gray-100 dark:bg-[#1c2229] text-text-secondary hover:bg-primary hover:text-white transition-colors">
-              3
-            </button>
-            <span className="flex items-center justify-center text-text-secondary">
-              ...
-            </span>
-            <button className="size-8 flex items-center justify-center rounded bg-gray-100 dark:bg-[#1c2229] text-text-secondary hover:bg-primary hover:text-white transition-colors">
+            <button
+              className="size-8 flex items-center justify-center rounded bg-gray-100 dark:bg-[#1c2229] text-text-secondary hover:bg-primary hover:text-white disabled:opacity-50 transition-colors"
+              disabled={page >= totalPages || loading}
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            >
               <span className="material-symbols-outlined text-sm">
                 chevron_right
               </span>
