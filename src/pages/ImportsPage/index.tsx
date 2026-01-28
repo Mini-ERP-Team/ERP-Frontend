@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import AddImportModal from "./components/AddImportModal";
 import ImportDetailModal from "./components/ImportDetailModal";
 import ErrorAlert from "../../components/ErrorAlert";
@@ -7,6 +8,7 @@ import { ActionButton, ImportStatusBadge } from "./components/ImportTableElement
 import { useImports } from "./hooks/useImports";
 
 const ImportsPage = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const userRole = useAuthStore((s) => s.user?.vaitro ?? "");
   const isAdmin = userRole.toUpperCase() === "ADMIN";
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -27,6 +29,15 @@ const ImportsPage = () => {
     fetchImports,
     handleConfirmImport,
   } = useImports();
+
+  const urlQ = searchParams.get("q") ?? "";
+  useEffect(() => {
+    if ((urlQ ?? "") !== (search ?? "")) {
+      setSearch(urlQ);
+      setPage(1);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [urlQ]);
 
   const pendingCount = useMemo(() => {
     return importList.filter((x) => x.status === "Pending Admin Confirmation").length;
@@ -83,8 +94,13 @@ const ImportsPage = () => {
             <input
               value={search}
               onChange={(e) => {
-                setSearch(e.target.value);
+                const v = e.target.value;
+                setSearch(v);
                 setPage(1);
+                const next = new URLSearchParams(searchParams);
+                if (v.trim()) next.set("q", v);
+                else next.delete("q");
+                setSearchParams(next, { replace: true });
               }}
               className="bg-white dark:bg-[#111418] text-gray-700 dark:text-white text-sm border border-gray-200 dark:border-[#283039] rounded-lg px-3 py-1.5 focus:ring-1 focus:ring-primary focus:outline-none"
               placeholder="Search (maphieu / supplier)..."

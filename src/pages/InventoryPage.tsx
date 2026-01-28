@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import productsApi from "../api/productsApi.ts";
 import ErrorAlert from "../components/ErrorAlert";
 
@@ -202,6 +203,7 @@ const InventoryPage = () => {
   const [totalPages, setTotalPages] = useState(1);
 
   const [search, setSearch] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
   const didInit = useRef(false);
 
   const mapDanhMucToUi = (danhmuc?: string | null) => {
@@ -292,6 +294,15 @@ const InventoryPage = () => {
     return () => window.clearTimeout(t);
   }, [page, search]);
 
+  const urlQ = searchParams.get("q") ?? "";
+  useEffect(() => {
+    if ((urlQ ?? "") !== (search ?? "")) {
+      setSearch(urlQ);
+      setPage(1);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [urlQ]);
+
   const lowStockCount = useMemo(() => {
     return productList.filter((p) => p.status === "Low Stock").length;
   }, [productList]);
@@ -372,8 +383,13 @@ const InventoryPage = () => {
             placeholder="Search by Product Name, SKU, or Category..."
             value={search}
             onChange={(e) => {
-              setSearch(e.target.value);
+              const v = e.target.value;
+              setSearch(v);
               setPage(1);
+              const next = new URLSearchParams(searchParams);
+              if (v.trim()) next.set("q", v);
+              else next.delete("q");
+              setSearchParams(next, { replace: true });
             }}
           />
         </div>

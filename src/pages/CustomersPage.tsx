@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import customersApi, { type CustomerDto } from "../api/customersApi.ts";
 import ErrorAlert from "../components/ErrorAlert";
 
@@ -67,6 +68,7 @@ const CustomerAvatar = ({ customer }: { customer: CustomerRow }) => {
 };
 
 const CustomersPage = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [customerList, setCustomerList] = useState<CustomerRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -117,6 +119,15 @@ const CustomersPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, page]);
 
+  const urlQ = searchParams.get("q") ?? "";
+  useEffect(() => {
+    if ((urlQ ?? "") !== (search ?? "")) {
+      setSearch(urlQ);
+      setPage(1);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [urlQ]);
+
   const showingFrom = useMemo(() => {
     if (customerList.length === 0) return 0;
     return (page - 1) * limit + 1;
@@ -142,8 +153,13 @@ const CustomersPage = () => {
               placeholder="Search customers by name, phone..."
               value={search}
               onChange={(e) => {
-                setSearch(e.target.value);
+                const v = e.target.value;
+                setSearch(v);
                 setPage(1);
+                const next = new URLSearchParams(searchParams);
+                if (v.trim()) next.set("q", v);
+                else next.delete("q");
+                setSearchParams(next, { replace: true });
               }}
             />
           </div>

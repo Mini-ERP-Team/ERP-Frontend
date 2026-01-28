@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import ordersApi, { type OrderListItemDto } from "../../api/ordersApi.ts";
 import ErrorAlert from "../../components/ErrorAlert";
 import SalesOrderDetailModal from "./components/SalesOrderDetailModal";
@@ -47,6 +47,7 @@ const StatusBadge = ({ status }: { status: string }) => {
 
 const SalesPage = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [orderList, setOrderList] = useState<OrderListItemDto[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -97,6 +98,15 @@ const SalesPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, page]);
 
+  const urlQ = searchParams.get("q") ?? "";
+  useEffect(() => {
+    if ((urlQ ?? "") !== (search ?? "")) {
+      setSearch(urlQ);
+      setPage(1);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [urlQ]);
+
   const openDetail = (id: number) => {
     setDetailId(id);
     setIsDetailOpen(true);
@@ -126,8 +136,13 @@ const SalesPage = () => {
             placeholder="Search orders by ID or Customer Name..."
             value={search}
             onChange={(e) => {
-              setSearch(e.target.value);
+              const v = e.target.value;
+              setSearch(v);
               setPage(1);
+              const next = new URLSearchParams(searchParams);
+              if (v.trim()) next.set("q", v);
+              else next.delete("q");
+              setSearchParams(next, { replace: true });
             }}
           />
         </div>

@@ -1,5 +1,7 @@
 
 import { useState } from "react";
+import { useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import AddProductModal from "./components/AddProductModal";
 import ProductDetailModal from "./components/ProductDetailModal";
 import ErrorAlert from "../../components/ErrorAlert";
@@ -9,6 +11,7 @@ import { useProducts } from "./hooks/useProducts";
 const ProductPage = () => {
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
   const {
     productList,
     loading,
@@ -26,6 +29,15 @@ const ProductPage = () => {
     handleAddProductSubmit,
   } = useProducts();
 
+  const urlQ = searchParams.get("q") ?? "";
+  useEffect(() => {
+    if ((urlQ ?? "") !== (search ?? "")) {
+      setSearch(urlQ);
+      setPage(1);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [urlQ]);
+
   return (
     <>
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -41,7 +53,15 @@ const ProductPage = () => {
               placeholder="Search by product name..."
               type="text"
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => {
+                const v = e.target.value;
+                setSearch(v);
+                setPage(1);
+                const next = new URLSearchParams(searchParams);
+                if (v.trim()) next.set("q", v);
+                else next.delete("q");
+                setSearchParams(next, { replace: true });
+              }}
             />
           </div>
 

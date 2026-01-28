@@ -1,5 +1,6 @@
+import { useEffect, useMemo, useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
-import { useLocation } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 
 const routeTitle = (pathname: string) => {
   if (pathname === "/dashboard") return "Dashboard Overview";
@@ -18,6 +19,43 @@ const Header = ({ title }: { title?: string }) => {
   const user = useAuthStore((state) => state.user);
   const location = useLocation();
   const computedTitle = title ?? routeTitle(location.pathname);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const supportsHeaderSearch = useMemo(() => {
+    const p = location.pathname;
+    return (
+      p === "/products" ||
+      p === "/customers" ||
+      p === "/sales" ||
+      p === "/inventory" ||
+      p === "/imports" ||
+      p === "/suppliers" ||
+      p === "/users"
+    );
+  }, [location.pathname]);
+
+  const urlQuery = searchParams.get("q") ?? "";
+  const [draftQuery, setDraftQuery] = useState(urlQuery);
+
+  useEffect(() => {
+    // Keep input in sync when navigating / when other page inputs update ?q=
+    setDraftQuery(urlQuery);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [urlQuery, location.pathname]);
+
+  useEffect(() => {
+    if (!supportsHeaderSearch) return;
+
+    const t = window.setTimeout(() => {
+      const next = new URLSearchParams(location.search);
+      const q = draftQuery.trim();
+      if (q) next.set("q", q);
+      else next.delete("q");
+      setSearchParams(next, { replace: true });
+    }, 250);
+
+    return () => window.clearTimeout(t);
+  }, [draftQuery, supportsHeaderSearch, location.search, setSearchParams]);
 
   return (
     <header className="flex items-center justify-between border-b border-card-dark bg-[#111418] px-8 py-4 sticky top-0 z-10">
@@ -36,6 +74,9 @@ const Header = ({ title }: { title?: string }) => {
           <input
             className="w-full bg-card-dark border-none rounded-lg py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-text-secondary focus:ring-1 focus:ring-primary focus:outline-none"
             placeholder="Search orders, products..."
+            value={draftQuery}
+            onChange={(e) => setDraftQuery(e.target.value)}
+            disabled={!supportsHeaderSearch}
           />
         </div>
 
