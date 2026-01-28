@@ -8,6 +8,7 @@ import SuppliersPage from "../pages/SuppliersPage";
 import UsersPage from "../pages/UsersPage";
 import InventoryPage from "../pages/InventoryPage";
 import SalesPage from "../pages/SalesPage";
+import SalesPosPage from "../pages/SalesPosPage";
 import ImportsPage from "../pages/ImportsPage";
 import RoleRoute from "../components/RoleRoute";
 
@@ -31,6 +32,7 @@ const AppRoutes = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
 
         <Route element={<RoleRoute allowedRoles={['STAFF']} />}>
             <Route path="/sales" element={<SalesPage />} />
+            <Route path="/sales/new" element={<SalesPosPage />} />
         </Route>
 
         <Route element={<RoleRoute allowedRoles={['ADMIN']} />}>

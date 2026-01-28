@@ -1,3 +1,5 @@
+import { useNavigate } from "react-router-dom";
+
 const StatCard = ({
   title,
   value,
@@ -25,6 +27,8 @@ const StatCard = ({
 );
 
 const DashboardPage = () => {
+  const navigate = useNavigate();
+
   return (
     <>
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -78,6 +82,11 @@ const DashboardPage = () => {
             <button
               key={idx}
               className="flex items-center gap-2 bg-card-dark hover:bg-primary text-white px-4 py-3 rounded-lg border border-card-dark hover:border-primary transition-all group"
+              onClick={() => {
+                if (action.label === "Create Order") navigate("/sales/new");
+                if (action.label === "Add Product") navigate("/products");
+                if (action.label === "New Supplier") navigate("/suppliers");
+              }}
             >
               <span className="material-symbols-outlined text-primary group-hover:text-white transition-colors">
                 {action.icon}
