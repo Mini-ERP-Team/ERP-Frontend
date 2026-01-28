@@ -19,7 +19,7 @@ type Props = {
   user: UserDetail | null;
   onClose: () => void;
   onEdit?: (user: UserDetail) => void;
-  onDelete?: (user: UserDetail) => void;
+  onToggleStatus?: (user: UserDetail) => void;
 };
 
 export default function UserDetailModal({
@@ -27,9 +27,9 @@ export default function UserDetailModal({
   user,
   onClose,
   onEdit,
-  onDelete,
+  onToggleStatus,
 }: Props) {
-  
+
   useEffect(() => {
     if (!isOpen) return;
     const onKeyDown = (e: KeyboardEvent) => {
@@ -62,7 +62,7 @@ export default function UserDetailModal({
 
         <div className="p-6 overflow-y-auto">
           <div className="flex flex-col md:flex-row gap-8">
-            
+
             <div className="w-full md:w-1/3 flex flex-col gap-4">
               <div className="aspect-square rounded-xl bg-[#111418] border border-[#283039] flex items-center justify-center overflow-hidden relative shadow-inner">
                 {user.avatar ? (
@@ -76,19 +76,19 @@ export default function UserDetailModal({
                   </div>
                 )}
               </div>
-              
+
               <div className="p-3 rounded-lg bg-[#111418] border border-[#283039] text-center">
-                 <span className="text-[#9dabb9] text-xs uppercase tracking-wider font-semibold block mb-1">
-                    User ID
-                 </span>
-                 <span className="text-white font-mono text-sm">
-                    {user.userId || "N/A"}
-                 </span>
+                <span className="text-[#9dabb9] text-xs uppercase tracking-wider font-semibold block mb-1">
+                  User ID
+                </span>
+                <span className="text-white font-mono text-sm">
+                  {user.userId || "N/A"}
+                </span>
               </div>
             </div>
 
             <div className="w-full md:w-2/3 flex flex-col gap-6">
-              
+
               <div>
                 <div className="flex items-start justify-between gap-4 mb-2">
                   <h2 className="text-2xl font-bold text-white leading-tight">
@@ -96,9 +96,9 @@ export default function UserDetailModal({
                   </h2>
                   <StatusBadge status={user.status} />
                 </div>
-                
+
                 <div className="text-xl text-primary font-medium mb-1">
-                    {user.role}
+                  {user.role}
                 </div>
                 <p className="text-[#9dabb9] text-sm flex items-center gap-2">
                   <span className="material-symbols-outlined text-[16px]">schedule</span>
@@ -129,11 +129,16 @@ export default function UserDetailModal({
 
         <div className="p-6 border-t border-[#283039] bg-[#1c252e] flex flex-col sm:flex-row gap-3 justify-end">
           <button
-            className="w-full sm:w-auto px-4 py-2.5 rounded-lg border border-red-500/20 text-red-500 hover:bg-red-500/10 transition-colors font-medium flex items-center justify-center gap-2"
-            onClick={() => onDelete?.(user)}
+            className={`w-full sm:w-auto px-4 py-2.5 rounded-lg border font-medium flex items-center justify-center gap-2 transition-colors ${user.status === "Active"
+                ? "border-red-500/20 text-red-500 hover:bg-red-500/10"
+                : "border-green-500/20 text-green-500 hover:bg-green-500/10"
+              }`}
+            onClick={() => onToggleStatus?.(user)}
           >
-            <span className="material-symbols-outlined text-[20px]">delete</span>
-            Delete User
+            <span className="material-symbols-outlined text-[20px]">
+              {user.status === "Active" ? "toggle_off" : "toggle_on"}
+            </span>
+            {user.status === "Active" ? "Deactivate" : "Activate"}
           </button>
 
           <button
@@ -163,16 +168,15 @@ function InfoItem({ label, value }: { label: string; value: string }) {
 }
 
 function StatusBadge({ status }: { status: string }) {
-    const isActive = status === "Active";
-    return (
-      <span
-        className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${
-          isActive
-            ? "bg-[#0bda5b]/10 text-[#0bda5b] border-[#0bda5b]/20"
-            : "bg-[#fa6238]/10 text-[#fa6238] border-[#fa6238]/20"
+  const isActive = status === "Active";
+  return (
+    <span
+      className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${isActive
+          ? "bg-[#0bda5b]/10 text-[#0bda5b] border-[#0bda5b]/20"
+          : "bg-[#fa6238]/10 text-[#fa6238] border-[#fa6238]/20"
         }`}
-      >
-        {status}
-      </span>
-    );
+    >
+      {status}
+    </span>
+  );
 }

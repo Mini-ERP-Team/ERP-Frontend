@@ -3,6 +3,7 @@ import { useState, useEffect, useMemo } from "react";
 import usersApi, { type UserDto } from "../../../api/usersApi";
 import type { AddUserPayload } from "../components/AddUserModal";
 import { formatDistanceToNow } from "date-fns";
+import type { EditUserForm } from "../components/EditUserModal";
 
 const mapApiRoleToLabel = (role: string): User["role"] => {
   const normalized = role?.toUpperCase?.() ?? "";
@@ -28,14 +29,14 @@ const mapDtoToUserRow = (dto: UserDto): User => {
   let relativeTime = "Never";
   if (dto.lancuoidangnhap) {
     try {
-      relativeTime = formatDistanceToNow(new Date(dto.lancuoidangnhap), { 
+      relativeTime = formatDistanceToNow(new Date(dto.lancuoidangnhap), {
         addSuffix: true,
       });
     } catch (e) {
       relativeTime = "Unknown";
     }
   }
-  
+
   return {
     id: String(dto.idnguoidung),
     name: dto.hoten,
@@ -88,7 +89,7 @@ export const useUsers = () => {
 
   const addUser = async (payload: AddUserPayload) => {
     const roleLabel = payload.vaitro === "ADMIN" ? "Admin" : "Staff";
-    
+
     const res = await usersApi.createUser({
       hoten: payload.hoten,
       mail: payload.email,
@@ -107,10 +108,76 @@ export const useUsers = () => {
     }
   };
 
+  const toggleUserStatus = async (id: string) => {
+    const current = userList.find((u) => u.id === id);
+    if (!current) return;
+
+    const nextStatus: User["status"] =
+      current.status === "Active" ? "Inactive" : "Active";
+
+    const nextTrangthaiBool = nextStatus === "Active"; // Active => true, Inactive => false
+
+    setUserList((prev) =>
+      prev.map((u) => (u.id === id ? { ...u, status: nextStatus } : u))
+    );
+
+    try {
+      await usersApi.updateStatus(id, { trangthai: nextTrangthaiBool });
+    } catch (err) {
+      setUserList((prev) =>
+        prev.map((u) => (u.id === id ? { ...u, status: current.status } : u))
+      );
+      throw err;
+    }
+  };
+
+  const updateUser = async (id: string, payload: EditUserForm) => {
+    const current = userList.find((u) => u.id === id);
+    if (!current) return;
+
+    const nextRoleLabel: User["role"] = payload.role === "ADMIN" ? "Admin" : "Staff";
+    const nextStatus: User["status"] = payload.isActive ? "Active" : "Inactive";
+
+    setUserList((prev) =>
+      prev.map((u) =>
+        u.id === id
+          ? {
+            ...u,
+            name: payload.fullName,
+            email: payload.email,
+            role: nextRoleLabel,
+            status: nextStatus,
+            initials: getInitials(payload.fullName),
+            colorClass: roleColorClass(nextRoleLabel),
+          }
+          : u
+      )
+    );
+
+    try {
+      const res = await usersApi.updateUser(id, {
+        hoten: payload.fullName,
+        mail: payload.email,
+        vaitro: payload.role,        
+        trangthai: payload.isActive, 
+        sdt: payload.phone?.trim() ? payload.phone.trim() : undefined,
+      });
+      if (res.data?.data) {
+        const mapped = mapDtoToUserRow(res.data.data);
+        setUserList((prev) => prev.map((u) => (u.id === id ? mapped : u)));
+      }
+    } catch (err) {
+      setUserList((prev) => prev.map((u) => (u.id === id ? current : u)));
+      throw err;
+    }
+  };
+
   return {
     userList,
     stats,
     loading,
     addUser,
+    toggleUserStatus,
+    updateUser,
   };
 };

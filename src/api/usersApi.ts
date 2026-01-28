@@ -13,6 +13,16 @@ export type CreateUserPayload = {
   trangthai?: boolean;
 };
 
+export type UpdateUserPayload = {
+  hoten: string;
+  mail: string;
+  vaitro: UserRole;
+  trangthai: boolean;
+  sdt?: string;
+  manhanvien?: string;
+  anhdaidien?: string;
+};
+
 export type UserDto = {
     idnguoidung: number;
     manhanvien?: string | null;
@@ -44,6 +54,12 @@ const usersApi = {
   },
   getAllUsers() {
     return axiosClient.get<ResponseUsersDto>("/users");
+  },
+  updateStatus(userId: string | number, payload: Partial<CreateUserPayload>) {
+    return axiosClient.put<ResponseUserDto>(`/users/${userId}`, payload);
+  },
+  updateUser(userId: string | number, payload: Partial<UpdateUserPayload>) {
+    return axiosClient.put<ResponseUserDto>(`/users/${userId}`, payload);
   },
 };
 

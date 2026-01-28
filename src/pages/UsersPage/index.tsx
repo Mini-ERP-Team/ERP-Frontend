@@ -4,32 +4,82 @@ import { useMemo, useState } from "react";
 import UserDetailModal, { type UserDetail } from "./components/UserDetailModal";
 import { RoleBadge, StatusBadge, UserAvatar } from "./components/UserTableElements";
 import { useUsers } from "./hooks/useUsers";
+import EditUserModal, { type EditUserForm } from "./components/EditUserModal";
+
 
 const UsersPage = () => {
-  const { userList, stats, loading, addUser } = useUsers();
+  const { userList, stats, loading, addUser, toggleUserStatus, updateUser } = useUsers();
 
   const [isAddUserOpen, setIsAddUserOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserDetail | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<EditUserForm | null>(null);
+  const [editingUserId, setEditingUserId] = useState<string | null>(null);
 
   const [roleFilter, setRoleFilter] = useState("all");
-
+  type RowUser = (typeof userList)[number];
   const filteredList = useMemo(() => {
     return userList.filter((user) => {
       const matchesRole = roleFilter === "all" || user.role === roleFilter;
 
       const query = searchQuery.toLowerCase().trim();
-      const matchesSearch = 
-        user.name.toLowerCase().includes(query) || 
+      const matchesSearch =
+        user.name.toLowerCase().includes(query) ||
         user.email.toLowerCase().includes(query);
 
       return matchesRole && matchesSearch;
     })
   }, [userList, roleFilter, searchQuery]);
 
+  const toEditForm = (u: { name: string; email: string; phone?: string; role: string; status: string }): EditUserForm => {
+    const roleUpper = (u.role || "").toUpperCase();
+
+    return {
+      fullName: u.name ?? "",
+      email: u.email ?? "",
+      phone: u.phone ?? "",
+      role: roleUpper === "ADMIN" || roleUpper === "STAFF"
+        ? (roleUpper as "ADMIN" | "STAFF")
+        : roleUpper === "ADMINISTRATOR"
+          ? "ADMIN"
+          : roleUpper === "STAFF MEMBER"
+            ? "STAFF"
+            : u.role === "Admin"
+              ? "ADMIN"
+              : "STAFF",
+      isActive: u.status === "Active",
+    };
+  };
+
   const handleAddSubmit = async (data: AddUserPayload) => {
     await addUser(data);
   };
+
+  const handleToggleStatusFromModal = async (u: UserDetail) => {
+    await toggleUserStatus(u.id);
+    setSelectedUser((prev) => (prev ? { ...prev, status: prev.status === "Active" ? "Inactive" : "Active" } : prev));
+  };
+
+
+  const handleToggleStatusFromRow = async (id: string) => {
+    await toggleUserStatus(id);
+    if (selectedUser?.id === id) {
+      setSelectedUser((prev) => (prev ? { ...prev, status: prev.status === "Active" ? "Inactive" : "Active" } : prev));
+    }
+  };
+
+  const handleEditUser = (user: RowUser) => {
+    setEditingUserId(user.id);
+    setEditingUser(toEditForm(user));
+    setIsEditOpen(true);
+    setSelectedUser(null);
+  };
+
+
+
+
+
   return (
     <>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -78,7 +128,7 @@ const UsersPage = () => {
       </div>
 
       <div className="bg-white dark:bg-input-bg rounded-xl border border-gray-200 dark:border-input-bg overflow-hidden flex flex-col shadow-sm dark:shadow-xl">
-         <div className="p-5 border-b border-gray-100 dark:border-[#111418] flex flex-col sm:flex-row gap-4 justify-between items-center bg-white dark:bg-input-bg">
+        <div className="p-5 border-b border-gray-100 dark:border-[#111418] flex flex-col sm:flex-row gap-4 justify-between items-center bg-white dark:bg-input-bg">
           <div className="relative w-full sm:w-80">
             <div className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary">
               <span className="material-symbols-outlined text-[20px]">
@@ -99,7 +149,7 @@ const UsersPage = () => {
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value)}
               className="appearance-none bg-gray-50 dark:bg-[#1c2229] border border-gray-200 dark:border-[#3e4a56] text-gray-900 dark:text-white text-sm rounded-lg block w-full sm:w-48 py-2.5 pl-4 pr-10 focus:ring-primary focus:border-primary cursor-pointer outline-none"
-              >
+            >
               <option value="all">All Roles</option>
               <option value="Admin">Administrator</option>
               <option value="Staff">Staff Member</option>
@@ -135,11 +185,11 @@ const UsersPage = () => {
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-[#111418]">
               {loading && <tr><td colSpan={5} className="p-8 text-center text-text-secondary">Loading users...</td></tr>}
-              
+
               {!loading && filteredList.length === 0 && (
                 <tr>
                   <td colSpan={5} className="p-8 text-center text-text-secondary">
-                    {searchQuery 
+                    {searchQuery
                       ? `No users found matching "${searchQuery}"`
                       : "No users found."}
                   </td>
@@ -189,26 +239,28 @@ const UsersPage = () => {
                     <StatusBadge status={user.status} />
                   </td>
                   <td className="p-4 pr-6 text-right">
-                    <div 
+                    <div
                       className="flex items-center justify-end gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={(e) => e.stopPropagation()} 
+                      onClick={(e) => e.stopPropagation()}
                     >
                       <button
-                        className="p-2 text-text-secondary hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#3e4a56] rounded-lg transition-colors"
-                        title="Edit User"
-                        onClick={() => console.log("Edit", user)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditUser(user);
+                        }}
                       >
-                        <span className="material-symbols-outlined text-[18px]">
-                          edit
-                        </span>
+                        Edit
                       </button>
+
+
+
                       {user.status === "Active" ? (
                         <button
                           className="p-2 text-text-secondary hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
                           title="Vô hiệu hóa nhân viên (Khoá tài khoản)"
                           onClick={(e) => {
-                              e.stopPropagation();
-                              console.log("Ban user", user.id);
+                            e.stopPropagation();
+                            handleToggleStatusFromRow(user.id);
                           }}
                         >
                           <span className="material-symbols-outlined text-[18px]">block</span>
@@ -218,8 +270,8 @@ const UsersPage = () => {
                           className="p-2 text-text-secondary hover:text-[#0bda5b] hover:bg-[#0bda5b]/10 rounded-lg transition-colors"
                           title="Kích hoạt lại nhân viên"
                           onClick={(e) => {
-                              e.stopPropagation();
-                              console.log("Unban user", user.id);
+                            e.stopPropagation();
+                            handleToggleStatusFromRow(user.id);
                           }}
                         >
                           <span className="material-symbols-outlined text-[18px]">check_circle</span>
@@ -265,10 +317,31 @@ const UsersPage = () => {
           user={selectedUser}
           isOpen={!!selectedUser}
           onClose={() => setSelectedUser(null)}
-          onEdit={(u) => console.log("Edit", u)} 
-          onDelete={(u) => console.log("Delete", u)}
+          onEdit={(u) => {
+            setEditingUserId(u.id);
+            setEditingUser(toEditForm(u));
+            setIsEditOpen(true);
+            setSelectedUser(null);
+          }}
+          onToggleStatus={(u) => handleToggleStatusFromModal(u)}
         />
       )}
+
+      <EditUserModal
+        isOpen={isEditOpen}
+        initialValue={editingUser ?? undefined}
+        onClose={() => setIsEditOpen(false)}
+        onSave={async (value) => {
+          if (!editingUserId) return;
+
+          await updateUser(editingUserId, value);
+
+          setIsEditOpen(false);
+          setEditingUserId(null);
+        }}
+      />
+
+
     </>
   );
 };
