@@ -37,24 +37,26 @@ const Sidebar = () => {
   ];
 
   const menuItems = allMenuItems.filter(item => {
-      if (user?.vaitro.toUpperCase() === 'ADMIN' && item.path === '/sales') {
-          return false;
-      }
-    
-      if (user?.vaitro.toUpperCase() === 'STAFF' && item.path === '/users') {
-          return false;
-      }
-      return true
+    if (user?.vaitro.toUpperCase() === 'ADMIN' && item.path === '/sales') {
+      return false;
+    }
+
+    if (user?.vaitro.toUpperCase() === 'STAFF' && item.path === '/users') {
+      return false;
+    }
+    return true
   })
 
   return (
     <aside className="flex h-full w-64 flex-col border-r border-card-dark bg-[#111418] flex-shrink-0 transition-all duration-300">
       <div className="flex flex-col h-full p-4">
         <div className="flex gap-3 mb-8 px-2">
-          <div className="bg-primary/20 flex items-center justify-center rounded-lg size-10 text-primary">
-            <span className="material-symbols-outlined text-2xl">
-              grid_view
-            </span>
+          <div className="bg-primary/20 flex items-center justify-center rounded-lg size-10 overflow-hidden">
+            <img
+              src="/logo.png"
+              alt="Company logo"
+              className="h-full w-full object-contain "
+            />
           </div>
           <div className="flex flex-col justify-center">
             <h1 className="text-white text-base font-bold leading-tight">
@@ -72,10 +74,9 @@ const Sidebar = () => {
               key={item.label}
               to={item.path}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors group ${
-                  isActive
-                    ? "bg-primary text-white"
-                    : "text-text-secondary hover:bg-card-dark hover:text-white"
+                `flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors group ${isActive
+                  ? "bg-primary text-white"
+                  : "text-text-secondary hover:bg-card-dark hover:text-white"
                 }`
               }
             >
