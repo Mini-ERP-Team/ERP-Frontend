@@ -1,13 +1,29 @@
 import { useAuthStore } from "../store/useAuthStore";
+import { useLocation } from "react-router-dom";
 
-const Header = ({ title }: { title: string }) => {
+const routeTitle = (pathname: string) => {
+  if (pathname === "/dashboard") return "Dashboard Overview";
+  if (pathname === "/products") return "Products Overview";
+  if (pathname === "/customers") return "Customers Overview";
+  if (pathname === "/suppliers") return "Suppliers Overview";
+  if (pathname === "/users") return "Users Overview";
+  if (pathname === "/inventory") return "Inventory Overview";
+  if (pathname === "/imports") return "Imports Overview";
+  if (pathname === "/sales") return "Sales Orders Overview";
+  if (pathname === "/sales/new") return "Create Sales Order";
+  return "Retail Manager System";
+};
+
+const Header = ({ title }: { title?: string }) => {
   const user = useAuthStore((state) => state.user);
+  const location = useLocation();
+  const computedTitle = title ?? routeTitle(location.pathname);
 
   return (
     <header className="flex items-center justify-between border-b border-card-dark bg-[#111418] px-8 py-4 sticky top-0 z-10">
       <div className="flex items-center gap-4">
         <h2 className="text-white text-xl font-bold leading-tight tracking-[-0.015em]">
-          {title}
+          {computedTitle}
         </h2>
       </div>
       <div className="flex items-center gap-6">

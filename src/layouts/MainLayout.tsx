@@ -15,7 +15,7 @@ const MainLayout = () => {
     <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display overflow-hidden h-screen w-full flex">
       <Sidebar />
       <main className="flex-1 flex flex-col h-full overflow-hidden relative">
-        <Header title="Dashboard Overview" />
+        <Header />
         <div className="flex-1 overflow-y-auto p-6 md:p-8">
           <div className="max-w-[1400px] mx-auto flex flex-col gap-8">
             <Outlet />
