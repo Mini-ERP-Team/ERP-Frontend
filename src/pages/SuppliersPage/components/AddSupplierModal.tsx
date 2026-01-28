@@ -1,21 +1,10 @@
 import { useState } from "react";
-
-export type AddSupplierPayload = {
-  manhacungcap: string;
-  tennhacungcap: string;
-  masothue: string;
-  loaiHang: string;  
-  nguoiLienHe: string;
-  chucVu: string;
-  sdt: string;
-  email: string;
-  diachi: string;
-};
+import ErrorAlert from "../../../components/ErrorAlert";
 
 type Props = {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: AddSupplierPayload) => void;
+  onSubmit: (data: AddSupplierPayload) => Promise<void>;
 };
 
 export default function AddSupplierModal({ isOpen, onClose, onSubmit }: Props) {
@@ -30,25 +19,48 @@ export default function AddSupplierModal({ isOpen, onClose, onSubmit }: Props) {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [address, setAddress] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    setError(null);
     if (!name.trim()) {
-        alert("Company Name is required!");
-        return;
+      setError("Company Name is required!");
+      return;
     }
 
-    onSubmit({
-      tennhacungcap: name,
-      manhacungcap: code,
-      masothue: taxId,
-      loaiHang: category,
-      nguoiLienHe: contactName,
-      chucVu: jobTitle,
-      sdt: phone,
-      email: email,
-      diachi: address,
-    });
-    onClose();
+    try {
+      setIsSubmitting(true);
+      await onSubmit({
+        tennhacungcap: name,
+        manhacungcap: code || undefined,
+        masothue: taxId || undefined,
+        loaiHang: category || undefined,
+        nguoiLienHe: contactName || undefined,
+        chucVu: jobTitle || undefined,
+        sdt: phone || undefined,
+        email: email || undefined,
+        diachi: address || undefined,
+      });
+
+      setName("");
+      setCode("");
+      setTaxId("");
+      setCategory("");
+      setContactName("");
+      setJobTitle("");
+      setPhone("");
+      setEmail("");
+      setAddress("");
+
+      onClose();
+    } catch (e) {
+      setError(
+        e instanceof Error ? e.message : "Create supplier failed. Please try again.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -68,6 +80,7 @@ export default function AddSupplierModal({ isOpen, onClose, onSubmit }: Props) {
         </div>
 
         <div className="p-6 overflow-y-auto custom-scrollbar">
+          {error && <ErrorAlert message={error} className="mb-4 mt-0" />}
           <div className="flex flex-col gap-6">
             
             <div>
@@ -213,15 +226,17 @@ export default function AddSupplierModal({ isOpen, onClose, onSubmit }: Props) {
         <div className="p-6 border-t border-[#283039] flex justify-end gap-3 bg-[#1c252e] rounded-b-xl">
           <button
             onClick={onClose}
-            className="px-5 py-2.5 rounded-lg border border-[#3e4a56] text-[#9dabb9] hover:text-white hover:bg-[#3e4a56] transition-colors text-sm font-medium"
+            disabled={isSubmitting}
+            className="px-5 py-2.5 rounded-lg border border-[#3e4a56] text-[#9dabb9] hover:text-white hover:bg-[#3e4a56] disabled:opacity-60 disabled:cursor-not-allowed transition-colors text-sm font-medium"
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
-            className="px-5 py-2.5 rounded-lg bg-primary hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20 transition-all text-sm font-medium"
+            disabled={isSubmitting}
+            className="px-5 py-2.5 rounded-lg bg-primary hover:bg-blue-600 disabled:hover:bg-primary disabled:opacity-60 disabled:cursor-not-allowed text-white shadow-lg shadow-blue-500/20 transition-all text-sm font-medium"
           >
-            Create Supplier
+            {isSubmitting ? "Creating..." : "Create Supplier"}
           </button>
         </div>
 

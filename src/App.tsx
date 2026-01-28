@@ -5,6 +5,7 @@ import { useAuthStore } from "./store/useAuthStore";
 import authApi from "./api/authApi";
 import AppRoutes from "./routes/AppRoutes";
 
+
 function App() {
   const [isChecking, setIsChecking] = useState(true);
   const { setAuth, isAuthenticated } = useAuthStore();
@@ -33,6 +34,7 @@ function App() {
           } catch {
           }
           console.log("Khôi phục thành công!");
+          console.log(useAuthStore.getState().user?.idnguoidung);
         }
       } catch {
         console.log("Không thể khôi phục (Token hết hạn hoặc chưa đăng nhập)");
